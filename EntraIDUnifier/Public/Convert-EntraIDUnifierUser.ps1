@@ -19,7 +19,10 @@ function Convert-EntraIDUnifierUser
         [Switch] $SkipAzureADModuleConnectionCheck,
         [Parameter(
             Mandatory=$false)]
-        [Switch] $AllowsAMAccountNameTruncation
+        [Switch] $AllowsAMAccountNameTruncation,
+        [Parameter(
+            Mandatory=$false)]
+        [Switch] $OnlyVerifyActions
     )
 
     # Check if AzureAD is connected
@@ -165,43 +168,53 @@ function Convert-EntraIDUnifierUser
     Write-Verbose "Adding 'Path' property to Active Directory user object."
     $NewActiveDirectoryUser | Add-Member -MemberType NoteProperty -Name 'Path' -Value $OUPath
 
-    # Attempt to create active direcory user account with the the $NewActiveDirectoryUser object
-    try {
-        Write-Verbose "Attempting to create Active Directory user account"
-        $NewActiveDirectoryUser | New-AdUser -ErrorAction Stop
-        Write-Verbose "Active Directory user account has been created"
-    } catch {
-        Write-Error "Unable to create Active Directory user account. Error $($Error[0])" -ErrorAction Stop
-    }
-    
-    # Attempt to get the newly created active directory user account
-    try {
-        Write-Verbose "Attempting to get the newly created Active Directory user account"
-        $NewActiveDirectoryUser = Get-AdUser -Identity $GeneratedsAMAccountName
-    } catch {
-        Write-Error "Unable to get the newly Active Directory user account" -ErrorAction Stop
-    }
+    # Check if we can run create and update actions
+    if (!$OnlyVerifyActions.IsPresent) {
 
-    # Add proxy addresses
-    Write-Verbose "Checking if proxy address need to be added to the user"
-    if ($ProxyAddresses.Count -ge 1) {
-        Write-Verbose "One or more proxy address need to be added"
+        # Attempt to create active direcory user account with the the $NewActiveDirectoryUser object
         try {
-            Write-Verbose "Attempting to add proxy addresses to the Active Directory user account"
-            Set-ADUser $NewActiveDirectoryUser -Add @{proxyAddresses=$ProxyAddresses}
+            Write-Verbose "Attempting to create Active Directory user account"
+            $NewActiveDirectoryUser | New-AdUser -ErrorAction Stop
+            Write-Verbose "Active Directory user account has been created"
         } catch {
-            Write-Error "Unable to add proxy addresses to the Active Directory user account"
+            Write-Error "Unable to create Active Directory user account. Error $($Error[0])" -ErrorAction Stop
         }
+        
+        # Attempt to get the newly created active directory user account
+        try {
+            Write-Verbose "Attempting to get the newly created Active Directory user account"
+            $NewActiveDirectoryUser = Get-AdUser -Identity $GeneratedsAMAccountName
+        } catch {
+            Write-Error "Unable to get the newly Active Directory user account" -ErrorAction Stop
+        }
+
+        # Add proxy addresses
+        Write-Verbose "Checking if proxy address need to be added to the user"
+        if ($ProxyAddresses.Count -ge 1) {
+            Write-Verbose "One or more proxy address need to be added"
+            try {
+                Write-Verbose "Attempting to add proxy addresses to the Active Directory user account"
+                Set-ADUser $NewActiveDirectoryUser -Add @{proxyAddresses=$ProxyAddresses}
+            } catch {
+                Write-Error "Unable to add proxy addresses to the Active Directory user account"
+            }
+        }
+
+        # Attempt to sync the newly created account with Entra ID
+        try {
+            Write-Verbose "Attempting to sync the Microsoft Entra ID user to the newly created Active Directory Account"
+            Sync-EntraIDUnifierUser -EntraIDUser $EntraIDUser -ActiveDirectoryUser $NewActiveDirectoryUser -SkipAzureADModuleConnectionCheck:$true
+            Write-Verbose "Microsoft Entra ID user has been updated to sync with the newly created Active Directory Account"
+        }
+        catch {
+            Write-Error "Unable to sync the newly create Active Directory account with Entra ID. Error $($Error[0])"
+        }
+
+    } else {
+
+        Write-Verbose "The OnlyVerifyActions switch parameter has been passed. Not adding or making changes to the account"
+
     }
 
-    # Attempt to sync the newly created account with Entra ID
-    try {
-        Write-Verbose "Attempting to sync the Microsoft Entra ID user to the newly created Active Directory Account"
-        Sync-EntraIDUnifierUser -EntraIDUser $EntraIDUser -ActiveDirectoryUser $NewActiveDirectoryUser -SkipAzureADModuleConnectionCheck:$true
-        Write-Verbose "Microsoft Entra ID user has been updated to sync with the newly created Active Directory Account"
-    }
-    catch {
-        Write-Error "Unable to sync the newly create Active Directory account with Entra ID. Error $($Error[0])"
-    }
 
 }
