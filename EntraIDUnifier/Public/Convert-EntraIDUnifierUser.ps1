@@ -48,10 +48,10 @@ function Convert-EntraIDUnifierUser
         Write-Error "The passed Microsoft Entra ID user looks to be a On-Premises Directory Synchronization Service Account." -ErrorAction Stop
     }
     
-    # Check if Entra ID User already has a immutable id 
-    Write-Verbose "Checking if Microsoft Entra ID user already has a Immutable ID"
-    if ($null -ne $EntraIDUser.ImmutableId) {
-        Write-Error "Microsoft Entra ID user already has a Immutable ID. This user looks to already be synced with Microsoft Entra Connect." -ErrorAction Stop
+    # Check if the Microsoft Entra ID user directory synced 
+    Write-Verbose "Checking if Microsoft Entra ID user is already directory synced"
+    if ($EntraIDUser.DirSyncEnabled) {
+        Write-Error "Microsoft Entra ID user already synced with Microsoft Entra Connect. This user looks to already be synced with Microsoft Entra Connect." -ErrorAction Stop
     }
 
     # Generating a sAMAccountName from the UserPrincipalName

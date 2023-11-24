@@ -13,7 +13,7 @@ function Sync-EntraIDUnifierUser
         [Switch] $SkipAzureADModuleConnectionCheck,
         [Parameter(
             Mandatory=$false)]
-        [Switch] $SkipEntraIDUserImmutableIDCheck
+        [Switch] $SkipEntraIDdirectorySyncedCheck
     )
 
     # Check if AzureAD is connected
@@ -32,13 +32,13 @@ function Sync-EntraIDUnifierUser
         Write-Verbose "Unable to update EntraIDUser object with data from Entra ID. Error $($Error[0])"
     }
     
-    # Check if Entra ID User already has a immutable id 
-    if ($SkipEntraIDUserImmutableIDCheck.IsPresent) {
-        Write-Verbose "Skipping Entra ID User Immutable ID check"
+    # Check if the Microsoft Entra ID user directory synced 
+    if ($SkipEntraIDdirectorySyncedCheck.IsPresent) {
+        Write-Verbose "Skipping Microsoft Entra ID user directory synced check"
     } else {
-        Write-Verbose "Checking if Microsoft Entra ID user already has a Immutable ID"
-        if ($null -ne $EntraIDUser.ImmutableId) {
-            Write-Error "Microsoft Entra ID user already has a Immutable ID. This user looks to already be synced with Microsoft Entra Connect." -ErrorAction Stop
+        Write-Verbose "Checking if Microsoft Entra ID user is already directory synced"
+        if ($EntraIDUser.DirSyncEnabled) {
+            Write-Error "Microsoft Entra ID user already synced with Microsoft Entra Connect. This user looks to already be synced with Microsoft Entra Connect." -ErrorAction Stop
         }
     }
 

@@ -16,5 +16,5 @@ Install-Module -Name EntraIDUnifier
 ```PowerShell tab=
 Invoke-WebRequest -Uri 'https://github.com/dylanmccrimmon/EntraIDUnifier/archive/refs/heads/main.zip' -OutFile "$($env:TEMP)\EntraIDUnifier-main.zip"; `
 Expand-Archive -LiteralPath "$($env:TEMP)\EntraIDUnifier-main.zip" -DestinationPath "$($env:USERPROFILE)\Documents\WindowsPowerShell\Modules"; `
-Import-Module "$($env:USERPROFILE)\Documents\WindowsPowerShell\Modules\EntraIDUnifier-main\EntraIDUnifier\EntraIDUnifier.psm1"
+Import-Module "$($env:USERPROFILE)\Documents\WindowsPowerShell\Modules\EntraIDUnifier-main\EntraIDUnifier\EntraIDUnifier.psm1" -Force
 ```
