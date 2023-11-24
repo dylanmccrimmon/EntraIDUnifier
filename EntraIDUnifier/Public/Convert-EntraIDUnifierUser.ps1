@@ -45,13 +45,13 @@ function Convert-EntraIDUnifierUser
     # Check that the account isn't a Directory Synchronization Service Account
     Write-Verbose "Checking if Microsoft Entra ID user is a On-Premises Directory Synchronization Service Account"
     if ($EntraIDUser.DisplayName -eq 'On-Premises Directory Synchronization Service Account') {
-        Write-Error "The passed Microsoft Entra ID user looks to be a On-Premises Directory Synchronization Service Account." -ErrorAction Stop
+        Throw "The passed Microsoft Entra ID user looks to be a On-Premises Directory Synchronization Service Account."
     }
     
     # Check if the Microsoft Entra ID user directory synced 
     Write-Verbose "Checking if Microsoft Entra ID user is already directory synced"
     if ($EntraIDUser.DirSyncEnabled) {
-        Write-Error "Microsoft Entra ID user already synced with Microsoft Entra Connect. This user looks to already be synced with Microsoft Entra Connect." -ErrorAction Stop
+        Throw "Microsoft Entra ID user already synced with Microsoft Entra Connect. This user looks to already be synced with Microsoft Entra Connect."
     }
 
     # Generating a sAMAccountName from the UserPrincipalName
@@ -79,19 +79,19 @@ function Convert-EntraIDUnifierUser
     Write-Verbose "Checking if the sAMAccountName is available for use to use within Active Directory"
     $sAMAccountNameSearchCheck = Get-ADUser -Filter "sAMAccountName -like '$($GeneratedsAMAccountName)'"
     if ($sAMAccountNameSearchCheck) {
-        Write-Error "The generated sAMAccountName is already in use within Active Directory" -ErrorAction Stop
+        Throw "The generated sAMAccountName ('$($GeneratedsAMAccountName)') is already in use within Active Directory"
     }
     
     Write-Verbose "Checking if the UserPrincipalName is available for use to use within Active Directory"
     $UserPrincipalNameSearchCheck = Get-ADUser -Filter "UserPrincipalName -like '$($EntraIDUser.UserPrincipalName)'"
     if ($UserPrincipalNameSearchCheck) {
-        Write-Error "The generated UserPrincipalName is already in use within Active Directory" -ErrorAction Stop
+        Throw "The generated UserPrincipalName is already in use within Active Directory"
     }
 
     # Check if the object name is already in use in the path 
     ## The display name is used as the cn by default in active directory
     if ($EntraIDUser.DisplayName -in (Get-ADObject -Filter * -SearchBase $OUPath).Name) {
-        Write-Error "The proposed CN is already in use in the '$OUPath' OU" -ErrorAction Stop
+        Throw "The proposed CN is already in use in the '$OUPath' OU"
     }
 
     # Create array of proxy address to add to the user later

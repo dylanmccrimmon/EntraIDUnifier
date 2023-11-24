@@ -7,7 +7,7 @@ function Test-AzureADConnect{
         Write-Verbose "Azure AD module connected"
     } 
     catch [Microsoft.Open.Azure.AD.CommonLibrary.AadNeedAuthenticationException] { 
-        Write-Error "AzureAD needs to be connected before running functions with this module. Run Connect-AzureAD and try again." -ErrorAction Stop
+        Throw "AzureAD needs to be connected before running functions with this module. Run Connect-AzureAD and try again."
     }
 
 }

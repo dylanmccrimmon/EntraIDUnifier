@@ -38,7 +38,7 @@ function Sync-EntraIDUnifierUser
     } else {
         Write-Verbose "Checking if Microsoft Entra ID user is already directory synced"
         if ($EntraIDUser.DirSyncEnabled) {
-            Write-Error "Microsoft Entra ID user already synced with Microsoft Entra Connect. This user looks to already be synced with Microsoft Entra Connect." -ErrorAction Stop
+            Throw "Microsoft Entra ID user already synced with Microsoft Entra Connect. This user looks to already be synced with Microsoft Entra Connect."
         }
     }
 
@@ -49,7 +49,7 @@ function Sync-EntraIDUnifierUser
     # Check if the Active Directory account is already synced with Entra ID
     Write-Verbose "Checking if the Active Directory account is already synced with Entra ID"
     if ($null -ne (Get-AzureADUser -Filter "ImmutableID eq '$($ImmutableID)'")) {
-        Write-Error "The Active Directory account is already synced with Entra ID" -ErrorAction Stop
+        Throw "The Active Directory account is already synced with Entra ID"
     }
 
     # Check UserPrincipalName - If using the onmicrosoft address then check the part before @ otherwise check full UserPrincipalName
@@ -89,7 +89,7 @@ function Sync-EntraIDUnifierUser
             Write-Verbose "Attempting to add proxy addresses to the Active Directory user account"
             Set-ADUser $ActiveDirectoryUser -Add @{proxyAddresses=$ProxyAddresses}
         } catch {
-            Write-Error "Unable to add proxy addresses to the Active Directory user account"
+            Throw "Unable to add proxy addresses to the Active Directory user account"
         }
     }
 
@@ -100,7 +100,7 @@ function Sync-EntraIDUnifierUser
         Write-Verbose "Microsoft Entra ID user's Immutable ID has been updated"
     }
     catch {
-        Write-Error "Unable to update Immutable ID. Error $($Error[0])" -ErrorAction Stop
+        Throw "Unable to update Immutable ID. Error $($Error[0])"
     }
 
 }
