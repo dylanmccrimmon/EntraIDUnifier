@@ -94,21 +94,6 @@ function Convert-EntraIDUnifierUser
         Throw "The proposed CN is already in use in the '$OUPath' OU"
     }
 
-    # Create array of proxy address to add to the user later
-    Write-Verbose "Creating ProxyAddress array to add to user"
-    $ProxyAddresses = @()
-    foreach ($ProxyAddress in $EntraIDUSer.ProxyAddresses) {
-
-        # Ignore the primary proxyaddress as this should match the UserPrincipalName
-        if (($ProxyAddress -clike 'SMTP:*') -and ($ProxyAddress -like "*:$($EntraIDUser.UserPrincipalName)")) {
-            Write-Verbose "The proxy address '$($ProxyAddress)' matches the UserPrincipalName. This proxy address will not be added to the array"
-        } else {
-            Write-Verbose "Adding proxy address '$($ProxyAddress)' to the array"
-            $ProxyAddresses += $ProxyAddress
-        }
-
-    }
-
     # Building new user object
     Write-Verbose "Building Active Directory user object"
     $NewActiveDirectoryUser = [PSCustomObject]@{}
@@ -186,18 +171,6 @@ function Convert-EntraIDUnifierUser
             $NewActiveDirectoryUser = Get-AdUser -Identity $GeneratedsAMAccountName
         } catch {
             Write-Error "Unable to get the newly Active Directory user account" -ErrorAction Stop
-        }
-
-        # Add proxy addresses
-        Write-Verbose "Checking if proxy address need to be added to the user"
-        if ($ProxyAddresses.Count -ge 1) {
-            Write-Verbose "One or more proxy address need to be added"
-            try {
-                Write-Verbose "Attempting to add proxy addresses to the Active Directory user account"
-                Set-ADUser $NewActiveDirectoryUser -Add @{proxyAddresses=$ProxyAddresses}
-            } catch {
-                Write-Error "Unable to add proxy addresses to the Active Directory user account"
-            }
         }
 
         # Attempt to sync the newly created account with Entra ID
