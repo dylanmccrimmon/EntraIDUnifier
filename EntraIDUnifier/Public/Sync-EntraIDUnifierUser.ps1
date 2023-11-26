@@ -13,7 +13,7 @@ function Sync-EntraIDUnifierUser
         [Switch] $SkipAzureADModuleConnectionCheck,
         [Parameter(
             Mandatory=$false)]
-        [Switch] $SkipEntraIDdirectorySyncedCheck
+        [Switch] $SkipEntraIDDirectorySyncedCheck
     )
 
     # Check if AzureAD is connected
@@ -33,7 +33,7 @@ function Sync-EntraIDUnifierUser
     }
     
     # Check if the Microsoft Entra ID user directory synced 
-    if ($SkipEntraIDdirectorySyncedCheck.IsPresent) {
+    if ($SkipEntraIDDirectorySyncedCheck.IsPresent) {
         Write-Verbose "Skipping Microsoft Entra ID user directory synced check"
     } else {
         Write-Verbose "Checking if Microsoft Entra ID user is already directory synced"
