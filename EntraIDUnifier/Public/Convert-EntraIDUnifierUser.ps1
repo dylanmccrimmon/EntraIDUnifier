@@ -96,44 +96,7 @@ function Convert-EntraIDUnifierUser
 
     # Building new user object
     Write-Verbose "Building Active Directory user object"
-    $NewActiveDirectoryUser = [PSCustomObject]@{}
-
-    ## To Do - Add employee id and employee type
-    $AttributeMappings = @{
-        # Identity
-        'Enabled'           = 'AccountEnabled'
-        'GivenName'         = 'GivenName'
-        'Surname'           = 'Surname'
-        'DisplayName'       = 'DisplayName'
-        'Name'              = 'DisplayName'
-        'UserPrincipalName' = 'UserPrincipalName'
-        
-        # Job Infomation
-        'Title'         = 'JobTitle'
-        'Department'    = 'Department'
-        'Company'       = 'Company'
-        'Office'        = 'PhysicalDeliveryOfficeName'
-
-        # Contact Infomation
-        'StreetAddress' = 'StreetAddress'
-        'City'          = 'City'
-        'State'         = 'State'
-        'PostalCode'    = 'PostalCode'
-        #'Country'       = 'Country'
-        'OfficePhone'   = 'TelephoneNumber'
-        'MobilePhone'   = 'Mobile'
-        'Fax'           =  'FacsimileTelephoneNumber'
-    }
-
-    # Loop through AttributeMappings and add to the $NewActiveDirectoryUser object
-    foreach ($Attribute in $AttributeMappings.GetEnumerator()) {
-
-        if ($null -ne $EntraIDUser."$($Attribute.Value)") {
-            Write-Verbose "Adding '$($Attribute.Name)' property to Active Directory user object from Entra ID property '$($Attribute.Value)'"
-            $NewActiveDirectoryUser | Add-Member -MemberType NoteProperty -Name $Attribute.Name -Value $EntraIDUser."$($Attribute.Value)"
-        }
-
-    }
+    $NewActiveDirectoryUser = Build-ADUserPropertiesObject -EntraIDUser $EntraIDUser
 
     # Add AccountPassword to the $NewActiveDirectoryUser object
     Write-Verbose "Adding 'AccountPassword' property to Active Directory user object from passed parameter"
@@ -145,10 +108,14 @@ function Convert-EntraIDUnifierUser
         $NewActiveDirectoryUser | Add-Member -MemberType NoteProperty -Name 'ChangePasswordAtLogon' -Value $True
     }
 
+    # Add UserPrincipalName to the $NewActiveDirectoryUser object
+    Write-Verbose "Adding 'UserPrincipalName' property to Active Directory user object from generated value"
+    $NewActiveDirectoryUser | Add-Member -MemberType NoteProperty -Name 'UserPrincipalName' -Value $EntraIDUser.UserPrincipalName
+
     # Add sAMAccountName to the $NewActiveDirectoryUser object
     Write-Verbose "Adding 'sAMAccountName' property to Active Directory user object from generated value"
     $NewActiveDirectoryUser | Add-Member -MemberType NoteProperty -Name 'sAMAccountName' -Value $GeneratedsAMAccountName
-
+    
     # Add Path in the pass variables
     Write-Verbose "Adding 'Path' property to Active Directory user object."
     $NewActiveDirectoryUser | Add-Member -MemberType NoteProperty -Name 'Path' -Value $OUPath
