@@ -16,6 +16,9 @@ function Sync-EntraIDUnifierUser
         [Switch] $SkipEntraIDDirectorySyncedCheck,
         [Parameter(
             Mandatory=$false)]
+        [Switch] $DontAddProxyAddresses,
+        [Parameter(
+            Mandatory=$false)]
         [Switch] $OnlyVerifyActions
     )
 
@@ -69,35 +72,39 @@ function Sync-EntraIDUnifierUser
         Write-Warning "The accounts different UserPrincipalName that will likely change once Microsoft Entra Connect syncs, should we continue?" -WarningAction Inquire
     }
 
-    # Create array of proxy address to add to the user later
-    Write-Verbose "Creating ProxyAddress array to add to user"
-    $ProxyAddresses = @()
-    foreach ($ProxyAddress in $EntraIDUSer.ProxyAddresses) {
+    if (!$DontAddProxyAddresses.IsPresent) {
+        # Create array of proxy address to add to the user later
+        Write-Verbose "Creating ProxyAddress array to add to user"
+        $ProxyAddresses = @()
+        foreach ($ProxyAddress in $EntraIDUSer.ProxyAddresses) {
 
-        # Ignore the primary proxyaddress as this should match the UserPrincipalName
-        if (($ProxyAddress -clike 'SMTP:*') -and ($ProxyAddress -like "*:$($EntraIDUser.UserPrincipalName)")) {
-            Write-Verbose "The proxy address '$($ProxyAddress)' matches the UserPrincipalName. This proxy address will not be added to the array"
-        } else {
-            Write-Verbose "Adding proxy address '$($ProxyAddress)' to the array"
-            $ProxyAddresses += $ProxyAddress
+            # Ignore the primary proxyaddress as this should match the UserPrincipalName
+            if (($ProxyAddress -clike 'SMTP:*') -and ($ProxyAddress -like "*:$($EntraIDUser.UserPrincipalName)")) {
+                Write-Verbose "The proxy address '$($ProxyAddress)' matches the UserPrincipalName. This proxy address will not be added to the array"
+            } else {
+                Write-Verbose "Adding proxy address '$($ProxyAddress)' to the array"
+                $ProxyAddresses += $ProxyAddress
+            }
+
         }
-
     }
 
     if (!$OnlyVerifyActions.IsPresent) {
 
-        # Add proxy addresses
-        Write-Verbose "Checking if proxy address need to be added to the user"
-        if ($ProxyAddresses.Count -ge 1) {
-            Write-Verbose "One or more proxy address need to be added"
-            try {
-                Write-Verbose "Attempting to add proxy addresses to the Active Directory user account"
-                Set-ADUser $ActiveDirectoryUser -Add @{proxyAddresses=$ProxyAddresses}
-            } catch {
-                Throw "Unable to add proxy addresses to the Active Directory user account"
+        if (!$DontAddProxyAddresses.IsPresent) {
+            # Add proxy addresses
+            Write-Verbose "Checking if proxy address need to be added to the user"
+            if ($ProxyAddresses.Count -ge 1) {
+                Write-Verbose "One or more proxy address need to be added"
+                try {
+                    Write-Verbose "Attempting to add proxy addresses to the Active Directory user account"
+                    Set-ADUser $ActiveDirectoryUser -Add @{proxyAddresses=$ProxyAddresses}
+                } catch {
+                    Throw "Unable to add proxy addresses to the Active Directory user account"
+                }
             }
         }
-
+        
         # Run Main
         try {
             Write-Verbose "Attempting to update Microsoft Entra ID user's Immutable ID"
