@@ -28,6 +28,7 @@ Sync-EntraIDUnifierUser
     [[-EntraIDUser] [Microsoft.Open.AzureAD.Model.User]]
     [[-ActiveDirectoryUser] [Microsoft.ActiveDirectory.Management.ADUser]]
     [-SkipEntraIDdirectorySyncedCheck]
+    [-DontAddProxyAddresses]
     [-SkipAzureADModuleConnectionCheck]
     [<CommonParameters>]
 ```
@@ -62,6 +63,18 @@ Accept wildcard characters: False
 Specifies if the cmdlet should skip the test to see if the Entra ID user account is already directory synced.
 
 > This paramater is useful when changing swapping the Active Directory account from one to another. Using this paramater will overwrite the Immutable ID that is set in Entra ID.
+
+```yaml
+Type: Switch
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -DontAddProxyAddresses 
+Specifies if the cmdlet should skip adding proxy addresses to the Active Directory account.
 
 ```yaml
 Type: Switch
