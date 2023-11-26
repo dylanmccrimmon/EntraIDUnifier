@@ -13,7 +13,10 @@ function Sync-EntraIDUnifierUser
         [Switch] $SkipAzureADModuleConnectionCheck,
         [Parameter(
             Mandatory=$false)]
-        [Switch] $SkipEntraIDDirectorySyncedCheck
+        [Switch] $SkipEntraIDDirectorySyncedCheck,
+        [Parameter(
+            Mandatory=$false)]
+        [Switch] $OnlyVerifyActions
     )
 
     # Check if AzureAD is connected
@@ -81,26 +84,32 @@ function Sync-EntraIDUnifierUser
 
     }
 
-    # Add proxy addresses
-    Write-Verbose "Checking if proxy address need to be added to the user"
-    if ($ProxyAddresses.Count -ge 1) {
-        Write-Verbose "One or more proxy address need to be added"
-        try {
-            Write-Verbose "Attempting to add proxy addresses to the Active Directory user account"
-            Set-ADUser $ActiveDirectoryUser -Add @{proxyAddresses=$ProxyAddresses}
-        } catch {
-            Throw "Unable to add proxy addresses to the Active Directory user account"
-        }
-    }
+    if (!$OnlyVerifyActions.IsPresent) {
 
-    # Run Main
-    try {
-        Write-Verbose "Attempting to update Microsoft Entra ID user's Immutable ID"
-        Set-AzureADUser -ObjectId $EntraIDUser.ObjectId -ImmutableId $ImmutableId
-        Write-Verbose "Microsoft Entra ID user's Immutable ID has been updated"
-    }
-    catch {
-        Throw "Unable to update Immutable ID. Error $($Error[0])"
+        # Add proxy addresses
+        Write-Verbose "Checking if proxy address need to be added to the user"
+        if ($ProxyAddresses.Count -ge 1) {
+            Write-Verbose "One or more proxy address need to be added"
+            try {
+                Write-Verbose "Attempting to add proxy addresses to the Active Directory user account"
+                Set-ADUser $ActiveDirectoryUser -Add @{proxyAddresses=$ProxyAddresses}
+            } catch {
+                Throw "Unable to add proxy addresses to the Active Directory user account"
+            }
+        }
+
+        # Run Main
+        try {
+            Write-Verbose "Attempting to update Microsoft Entra ID user's Immutable ID"
+            Set-AzureADUser -ObjectId $EntraIDUser.ObjectId -ImmutableId $ImmutableId
+            Write-Verbose "Microsoft Entra ID user's Immutable ID has been updated"
+        }
+        catch {
+            Throw "Unable to update Immutable ID. Error $($Error[0])"
+        }
+
+    } else {
+        Write-Verbose "The OnlyVerifyActions switch parameter has been passed. Not adding or making changes to the account"
     }
 
 }
