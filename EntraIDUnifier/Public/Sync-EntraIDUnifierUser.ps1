@@ -20,7 +20,7 @@ function Sync-EntraIDUnifierUser
     if ($SkipAzureADModuleConnectionCheck.IsPresent) {
         Write-Verbose "Skipping AzureAD module connection check"
     } else {
-        Test-AzureADConnect
+        Test-AzureADModuleConnection
     }
 
     try {

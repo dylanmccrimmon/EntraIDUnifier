@@ -29,7 +29,7 @@ function Convert-EntraIDUnifierUser
     if ($SkipAzureADModuleConnectionCheck.IsPresent) {
         Write-Verbose "Skipping AzureAD module connection check"
     } else {
-        Test-AzureADConnect
+        Test-AzureADModuleConnection
     }
 
     # Update the passed $EntraIDUser with data from EntraID

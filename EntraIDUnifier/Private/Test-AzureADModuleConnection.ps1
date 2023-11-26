@@ -1,4 +1,4 @@
-function Test-AzureADConnect{
+function Test-AzureADModuleConnection {
 
     Write-Verbose "Checking AzureAD module connection"
 
