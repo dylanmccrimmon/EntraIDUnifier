@@ -68,7 +68,7 @@ function Convert-EntraIDUnifierUser
         if ($AllowsAMAccountNameTruncation.IsPresent) {
             Write-Verbose "AllowsAMAccountNameTruncation switch is present. Automatically truncating the sAMAccountName"
         } else {
-            Write-Warning "The generated sAMAccountName is over the 15 character limit. The sAMAccountName will be truncated to '$GeneratedsAMAccountName', should we continue?" -WarningAction Inquire
+            Throw "The generated sAMAccountName is over the 15 character limit ('$($EntraIDUser.UserPrincipalName.Split("@")[0])')."
         }
 
     }
