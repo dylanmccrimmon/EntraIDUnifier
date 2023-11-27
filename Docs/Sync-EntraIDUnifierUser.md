@@ -30,6 +30,7 @@ Sync-EntraIDUnifierUser
     [-SkipEntraIDdirectorySyncedCheck]
     [-DontAddProxyAddresses]
     [-SkipAzureADModuleConnectionCheck]
+    [-OnlyVerifyActions]
     [<CommonParameters>]
 ```
 
@@ -87,6 +88,18 @@ Accept wildcard characters: False
 
 ### -SkipAzureADModuleConnectionCheck 
 Specifies if the cmdlet should skip the test to see if the AzureAD module is connected.
+
+```yaml
+Type: Switch
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -OnlyVerifyActions 
+Specifies if the cmdlet should only verify inputs. This will not make any account updates or creations.
 
 ```yaml
 Type: Switch
