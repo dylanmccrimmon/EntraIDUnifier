@@ -2,10 +2,16 @@
 
 EntraIDUnifier is a small powershell modules that helps hard match and convert Entra ID cloud accounts to on-premises / hybrid accounts. It is able to create the accounts in Active Directory based on properties set on the Entra ID account. It can also hard match the Entra ID account to an exisiting Active Directory account.
 
+Before using this module, its importent to note that the module assumes the following:
+
+- The Entra ID account uses the UserPrincipalName as the on-premises attribute to use as the Entra ID account username
+- The source anchor configured in Entra ID Connect is configured as `ObjectGUID` or `mS-DS-ConsistencyGuid`
+
 ## Documentation
 The module exports the following cmdlets. Documentation for each cmdlet can be found in the docs folder or by clicking below.
 
 [Convert-EntraIDUnifierUser](Docs/Convert-EntraIDUnifierUser.md)
+
 [Sync-EntraIDUnifierUser](Docs/Sync-EntraIDUnifierUser.md)
 
 ## Installation
