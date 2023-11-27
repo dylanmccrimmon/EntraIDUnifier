@@ -14,6 +14,8 @@ The module exports the following cmdlets. Documentation for each cmdlet can be f
 
 [Sync-EntraIDUnifierUser](Docs/Sync-EntraIDUnifierUser.md)
 
+> When using either cmdlets, if you want to test if there will be any error before making changes, you may use the `-OnlyVerifyActions` switch. You can also specify the `-Verbose` switch to show logs & current actions being performed.
+
 ## Installation
 ### Directly Download Github & Import on the fly
 ```PowerShell tab=
