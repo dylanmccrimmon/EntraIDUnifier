@@ -22,4 +22,4 @@ $PSModuleRoot = $PSScriptRoot
 Export-ModuleMember -Function $Public.Basename
 
 # Write warning message
-Write-Host "Before continuing to use this module, please read the documentation first. The documentation can be found on GitHub: https://github.com/dylanmccrimmon/EntraIDUnifier" -ForegroundColor Yellow
+Write-Output "Before continuing to use this module, please read the documentation first. The documentation can be found on GitHub: https://github.com/dylanmccrimmon/EntraIDUnifier" -ForegroundColor Yellow
